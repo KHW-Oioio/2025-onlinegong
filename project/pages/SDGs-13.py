@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from pages.data_loader import load_weather_data, load_disaster_data
+# 🔧 같은 폴더(data_loader.py)에 있으므로 'pages.' 없이 import
+from data_loader import load_weather_data, load_disaster_data
 
 st.set_page_config(page_title="SDGs‑13 시뮬레이션", layout="wide")
 st.title("🔥 기후 변화에 따른 재난 피해 예측 시뮬레이션")
@@ -14,6 +15,7 @@ st.title("🔥 기후 변화에 따른 재난 피해 예측 시뮬레이션")
 weather = load_weather_data()
 disaster = load_disaster_data()
 
+# ✅ 기온 및 강수량 시각화
 st.subheader("📊 기온 및 강수량 시각화")
 region = st.selectbox("지역을 선택하세요", weather.columns.drop("date"))
 
@@ -27,12 +29,15 @@ ax2.set_ylabel("강수량(mm)")
 fig.tight_layout()
 st.pyplot(fig)
 
+# ✅ 과거 재난 피해 통계
 st.subheader("📉 과거 재난 피해 통계")
 if "region" in disaster.columns:
     region_list = disaster["region"].unique().tolist()
     selected = st.selectbox("재난 통계 지역 선택", region_list)
     filtered = disaster[disaster["region"] == selected]
-    st.write(filtered.groupby("year")["damage_amount_hundred_million_won"].sum().reset_index())
+    st.write(
+        filtered.groupby("year")["damage_amount_hundred_million_won"].sum().reset_index()
+    )
 else:
     st.warning("disaster.csv에 'region' 컬럼이 존재하지 않습니다. 컬럼명을 확인해주세요.")
 
