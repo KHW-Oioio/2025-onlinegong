@@ -1,10 +1,8 @@
-# pages/data_loader.py
-
 import os
 import pandas as pd
 
-# 상위 디렉토리(project/) 기준으로 data 폴더 지정
-PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+# 🔧 상위 폴더(project/)에 있는 data 디렉터리 지정
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))  # pages/의 부모 = project/
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 
 def load_weather_data():
