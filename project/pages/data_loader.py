@@ -3,8 +3,8 @@
 import os
 import pandas as pd
 
-# 🔧 project/data 경로를 절대경로로 지정
-PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))  # pages/의 부모 = project/
+# 상위 디렉토리(project/) 기준으로 data 폴더 지정
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 
 def load_weather_data():
