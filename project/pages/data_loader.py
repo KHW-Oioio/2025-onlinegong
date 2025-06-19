@@ -1,7 +1,13 @@
+# pages/data_loader.py
+
 import os
 import pandas as pd
 
-DATA_DIR = "data"
+# 현재 파일 위치 기준으로 data 폴더 경로 지정
+BASE_DIR = os.path.dirname(__file__)               # 현재 파일 경로 (pages/)
+DATA_DIR = os.path.join(BASE_DIR, "data")          # pages/data/
+
+# 데이터 디렉토리 없으면 생성
 os.makedirs(DATA_DIR, exist_ok=True)
 
 def load_weather_data():
