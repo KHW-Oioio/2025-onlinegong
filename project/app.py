@@ -1,9 +1,10 @@
+# ✅ app.py
 import os, sys, streamlit as st
 
-# 현재 디렉토리를 sys.path에 추가하여 모듈을 인식하도록 설정
-CURRENT_DIR = os.path.dirname(__file__)
-if CURRENT_DIR not in sys.path:
-    sys.path.append(CURRENT_DIR)
+# 🔧 루트 경로를 모듈 탐색 경로에 추가
+ROOT_DIR = os.path.dirname(__file__)
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
 
 from data_loader import load_weather_data, load_disaster_data
 
@@ -13,6 +14,17 @@ st.markdown("사이드바 메뉴에서 'SDGs‑13' 페이지를 눌러 시뮬레
 
 # 데이터 미리보기
 st.header("🔎 데이터 미리보기")
-st.dataframe(load_weather_data().head())
-st.dataframe(load_disaster_data().head())
+try:
+    weather = load_weather_data()
+    st.subheader("✅ 기상 데이터 (weather.csv)")
+    st.dataframe(weather.head())
+except FileNotFoundError as e:
+    st.error(str(e))
+
+try:
+    disaster = load_disaster_data()
+    st.subheader("✅ 재난 데이터 (disaster.csv)")
+    st.dataframe(disaster.head())
+except FileNotFoundError as e:
+    st.error(str(e))
 
