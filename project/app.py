@@ -1,3 +1,11 @@
+import os, sys
+
+# 현재 디렉터리를 모듈 경로에 추가
+CURRENT_DIR = os.path.dirname(__file__)
+if CURRENT_DIR not in sys.path:
+    sys.path.append(CURRENT_DIR)
+
+from data_loader import load_weather_data, load_disaster_data
 import streamlit as st
 from data_loader import load_weather_data, load_disaster_data
 st.set_page_config(page_title="SDGs13 기후 피해 예측", layout="wide")
