@@ -1,3 +1,17 @@
+# pages/SDGs-13.py
+import os, sys
+CURRENT_DIR = os.path.dirname(__file__)          # .../pages
+ROOT_DIR    = os.path.abspath(os.path.join(CURRENT_DIR, os.pardir))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)                    # 루트(프로젝트 최상단)를 모듈 경로에 추가
+
+from data_loader import load_weather_data, load_disaster_data, REGION_COORDS
+from model import build_graph, run_monte_carlo
+from utils import plot_histogram, plot_correlation, plot_pie, make_damage_map
+import streamlit as st
+import pandas as pd
+# ------------------- 이하 기존 코드 그대로 -------------------
+
 import streamlit as st, pandas as pd
 from data_loader import load_weather_data, load_disaster_data, REGION_COORDS
 from model import build_graph, run_monte_carlo
