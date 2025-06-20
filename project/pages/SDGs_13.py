@@ -7,7 +7,7 @@ import pandas as pd
 import os, sys
 
 # 상위 폴더 경로를 Python 모듈 경로에 추가
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__init__), "..")))
 
 from data_loader import load_weather_data, load_disaster_data, COUNTRY_COORDS
 from model import build_graph, run_mc
