@@ -1,19 +1,4 @@
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-import platform
 
-if platform.system() == 'Windows':
-    font_path = 'C:/Windows/Fonts/malgun.ttf'
-elif platform.system() == 'Darwin':
-    font_path = '/System/Library/Fonts/Supplemental/AppleGothic.ttf'
-else:
-    font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
-
-fontprop = fm.FontProperties(fname=font_path)
-plt.rcParams['font.family'] = fontprop.get_name()
-plt.rcParams['axes.unicode_minus'] = False
-
-# ... 이하 기존 그래프 생성 코드
 
 import os, streamlit as st, numpy as np, pandas as pd, seaborn as sns, matplotlib.pyplot as plt
 
@@ -54,10 +39,11 @@ st.markdown(f"- 정책 적용 후 평균 예상 피해액: **{np.mean(results):,
 
 fig, ax = plt.subplots()
 sns.histplot(results, kde=True, ax=ax, color="teal")
-ax.set_xlabel("예상 피해액 (억원)")
-ax.set_ylabel("빈도")
-ax.set_title(f"{policy_name} 적용 시 예상 피해액 분포")
+ax.set_xlabel("Estimated Damage (billion KRW)")
+ax.set_ylabel("Frequency")
+ax.set_title(f"Damage Distribution under Policy: {policy_name}")
 st.pyplot(fig)
+
 
 st.markdown("""
 ---
