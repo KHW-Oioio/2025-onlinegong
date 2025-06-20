@@ -11,8 +11,7 @@ COUNTRY_LIST = weather_df["country"].unique().tolist()
 st.title("🔬 변수 상관관계 분석")
 
 country = st.selectbox("국가", COUNTRY_LIST)
-w = load_weather_data()
-d = load_disaster_data()
+
 
 cw = w[w["country"] == country]
 cd = d[d["country"] == country]
