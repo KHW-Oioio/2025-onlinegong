@@ -6,17 +6,17 @@ def plot_weather(df, country):
     st.subheader(f"📈 {country} - 연도별 기온 및 강수량 변화")
     fig, ax1 = plt.subplots(figsize=(10, 5))
 
-    ax1.set_xlabel("연도")
-    ax1.set_ylabel("평균 기온 (°C)", color="tab:red")
-    ax1.plot(df["year"], df["avg_temp"], color="tab:red", label="평균 기온")
+    ax1.set_xlabel("Year")
+    ax1.set_ylabel("Avg Temp (°C)", color="tab:red")
+    ax1.plot(df["year"], df["avg_temp"], color="tab:red", marker="o")
     ax1.tick_params(axis="y", labelcolor="tab:red")
 
     ax2 = ax1.twinx()
-    ax2.set_ylabel("연 강수량 (mm)", color="tab:blue")
-    ax2.bar(df["year"], df["precip"], alpha=0.3, color="tab:blue", label="강수량")
+    ax2.set_ylabel("Precipitation (mm)", color="tab:blue")
+    ax2.bar(df["year"], df["precip"], alpha=0.3, color="tab:blue")
     ax2.tick_params(axis="y", labelcolor="tab:blue")
 
-    plt.title(f"{country}의 기후 변화 추이")
+    plt.title(f"{country} – Climate Trend (2018–2022)")
     st.pyplot(fig)
 
 def plot_disaster_pie(df):
