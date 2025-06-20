@@ -10,7 +10,7 @@ disaster_df = pd.read_csv(DISASTER_CSV)
 
 COUNTRY_LIST = weather_df["country"].unique().tolist()
 
-st.title("🌡️ SDGs‑13 Risk Score Analysis")
+st.title("🌡️ SDGs‑13 8개국의 기후 리스크 점수 자동 계산")
 
 # 1. 지표 정규화 (min-max scaling)
 metrics = []
