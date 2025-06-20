@@ -6,3 +6,4 @@ folium
 numpy
 networkx
 plotly
+fontconfig
