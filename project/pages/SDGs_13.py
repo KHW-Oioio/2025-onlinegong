@@ -34,3 +34,4 @@ results = run_monte_carlo(base_damage, policy_effectiveness=effectiveness)
 plot_monte_carlo(results)
 
 st.success(f"✔️ 평균 예상 피해액: {round(sum(results)/len(results), 2)} 억원")
+
