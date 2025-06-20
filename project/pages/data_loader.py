@@ -1,105 +1,95 @@
-import os, requests, json, pandas as pd
+import os, requests, pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# project/data directory (one level up from pages)
-DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
+BASE_DIR = os.path.dirname(__file__)
+DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "data"))
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# ------------------------------------------------------------
-# 1. Real WEATHER data via Open‑Meteo archive (free & key‑less)
-#    3 demo regions with coords; easy to add more.
-# ------------------------------------------------------------
-REGION_COORDS = {
-    "Seoul":   (37.5665, 126.9780),
-    "Busan":   (35.1796, 129.0756),
-    "Daegu":   (35.8714, 128.6014),
+# ---------- 1. Country coordinate list (10 대표 국가) ----------
+COUNTRY_COORDS = {
+    "Seoul, KR":        (37.5665, 126.9780),
+    "Washington, US":   (38.9072, -77.0369),
+    "Beijing, CN":      (39.9042, 116.4074),
+    "New Delhi, IN":    (28.6139, 77.2090),
+    "Berlin, DE":       (52.5200, 13.4050),
+    "Tokyo, JP":        (35.6895, 139.6917),
+    "Paris, FR":        (48.8566, 2.3522),
+    "Brasília, BR":     (-15.7939, -47.8828),
+    "Ottawa, CA":       (45.4215, -75.6972),
+    "Canberra, AU":     (-35.2809, 149.1300),
 }
+START_DATE = "2023-01-01"; END_DATE = "2023-12-31"
 
-ARCHIVE_START = "2023-01-01"
-ARCHIVE_END   = "2023-12-31"
+# ---------- Weather fetch ----------
+def _fetch_weather(lat, lon):
+    url=("https://archive-api.open-meteo.com/v1/archive"
+         f"?latitude={lat}&longitude={lon}&start_date={START_DATE}&end_date={END_DATE}"
+         "&daily=temperature_2m_mean,precipitation_sum,windspeed_10m_max"
+         "&timezone=UTC")
+    j = requests.get(url, timeout=30).json()["daily"]
+    return j
 
-def _fetch_region_weather(region:str):
-    lat, lon = REGION_COORDS[region]
-    url = (
-        "https://archive-api.open-meteo.com/v1/archive"
-        f"?latitude={lat}&longitude={lon}"
-        f"&start_date={ARCHIVE_START}&end_date={ARCHIVE_END}"
-        "&daily=temperature_2m_mean,precipitation_sum,windspeed_10m_max"
-        "&timezone=Asia%2FSeoul"
-    )
-    r = requests.get(url, timeout=30)
-    ds = r.json()["daily"]
-    return pd.DataFrame({
-        "date": ds["time"],
-        f"{region}_temp":   ds["temperature_2m_mean"],
-        f"{region}_precip": ds["precipitation_sum"],
-        f"{region}_wind":   ds["windspeed_10m_max"],
+def _build_weather_csv(country:str):
+    lat,lon = COUNTRY_COORDS[country]
+    j=_fetch_weather(lat,lon)
+    df=pd.DataFrame({
+        "date": j["time"],
+        "temp": j["temperature_2m_mean"],
+        "precip": j["precipitation_sum"],
+        "wind": j["windspeed_10m_max"],
+        "country": country,
     })
-
-def _build_weather_csv():
-    dfs = [_fetch_region_weather(r) for r in REGION_COORDS]
-    df = dfs[0]
-    for d in dfs[1:]:
-        df = df.merge(d, on="date")
-    df.to_csv(os.path.join(DATA_DIR, "weather.csv"), index=False)
+    df.to_csv(os.path.join(DATA_DIR,f"weather_{country.split(',')[0]}.csv"), index=False)
     return df
 
-# ------------------------------------------------------------
-# 2. Real DISASTER stats: try UNDRR GAR API (public, no auth)   
-#    Fallback to internal demo CSV if API fails.
-# ------------------------------------------------------------
+def load_weather_data(country:str):
+    fname=os.path.join(DATA_DIR,f"weather_{country.split(',')[0]}.csv")
+    if not os.path.exists(fname):
+        return _build_weather_csv(country)
+    return pd.read_csv(fname, parse_dates=["date"])
 
-def _fetch_disaster_undrr():
-    # GAR API: https://risk-informed-dev.github.io/gar-api/
-    # We'll pull Korea (410) summary for 2000‑2023.
+# ---------- Disaster fetch ----------
+DISASTER_PATH=os.path.join(DATA_DIR,"disaster.csv")
+
+def _fetch_disaster_global():
     try:
-        url = "https://garapi.globalgarhub.org/v1/risks/iso/KOR"
-        recs = requests.get(url, timeout=30).json()["records"]
-        rows = []
-        for r in recs:
-            rows.append({
-                "year": r["year"],
-                "region": "Korea",
-                "damage_amount_hundred_million_won": r.get("economic_loss_avg", 0)/1e8,
-                "deaths": r.get("mortality_avg", 0),
-            })
-        df = pd.DataFrame(rows)
-        df.to_csv(os.path.join(DATA_DIR, "disaster.csv"), index=False)
-        return df
+        url="https://garapi.globalgarhub.org/v1/risks/iso/KOR"  # sample call
+        _=requests.get(url,timeout=10).json();  # just test connectivity
     except Exception:
         return None
+    rows=[]
+    for iso,name in [("USA","United States"),("CHN","China"),("IND","India"),("BRA","Brazil"),("DEU","Germany"),("FRA","France"),("JPN","Japan"),("KOR","South Korea"),("CAN","Canada"),("AUS","Australia")]:
+        try:
+            recs=requests.get(f"https://garapi.globalgarhub.org/v1/risks/iso/{iso}",timeout=20).json()["records"]
+            for r in recs:
+                rows.append({
+                    "year": r["year"],
+                    "region": name,
+                    "damage_amount_hundred_million_won": r.get("economic_loss_avg",0)/1e8,
+                    "deaths": r.get("mortality_avg",0),
+                })
+        except Exception:
+            pass
+    pd.DataFrame(rows).to_csv(DISASTER_PATH,index=False)
 
-def _build_demo_disaster_csv():
-    demo = """year,region,damage_amount_hundred_million_won,deaths
-2020,Seoul,1.5,2
-2021,Busan,0.8,0
-2022,Daegu,2.1,1
-2022,Seoul,1.2,0
+
+def _build_demo_disaster():
+    demo="""year,region,damage_amount_hundred_million_won,deaths
+2021,United States,120,5
+2021,China,130,8
+2021,India,60,3
+2021,Brazil,25,1
+2021,Germany,18,0
 """
-    with open(os.path.join(DATA_DIR, "disaster.csv"), "w", encoding="utf-8") as f:
-        f.write(demo)
-    return pd.read_csv(os.path.join(DATA_DIR, "disaster.csv"))
-
-# ------------------------------------------------------------
-# Public loader functions
-# ------------------------------------------------------------
-
-def load_weather_data():
-    path = os.path.join(DATA_DIR, "weather.csv")
-    if not os.path.exists(path):
-        _build_weather_csv()
-    return pd.read_csv(path, parse_dates=["date"])
+    with open(DISASTER_PATH,"w",encoding="utf-8") as f: f.write(demo)
 
 
 def load_disaster_data():
-    path = os.path.join(DATA_DIR, "disaster.csv")
-    if not os.path.exists(path):
-        df = _fetch_disaster_undrr()
-        if df is None:
-            df = _build_demo_disaster_csv()
-    df = pd.read_csv(path)
-    df.columns = df.columns.str.strip().str.lower()
+    if not os.path.exists(DISASTER_PATH):
+        if _fetch_disaster_global() is None:
+            _build_demo_disaster()
+    df=pd.read_csv(DISASTER_PATH)
+    df.columns=df.columns.str.strip().str.lower()
     return df
