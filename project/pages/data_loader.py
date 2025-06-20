@@ -3,7 +3,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(__init__)
 DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "data"))
 os.makedirs(DATA_DIR, exist_ok=True)
 
