@@ -5,4 +5,4 @@ seaborn
 folium
 numpy
 networkx
-
+plotly
