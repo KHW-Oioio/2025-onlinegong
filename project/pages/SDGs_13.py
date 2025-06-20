@@ -15,7 +15,7 @@ disaster_df = pd.read_csv(DISASTER_CSV)
 COUNTRY_LIST = weather_df["country"].unique().tolist()
 
 # 2. 페이지 UI
-st.title("🌍 SDGs‑13 Climate & Disaster Dashboard (CSV‑only)")
+st.title("🌍 SDGs‑13 주요8개국 weather , disaster 분석 대쉬보드 ")
 
 country = st.selectbox("분석할 국가 선택:", COUNTRY_LIST)
 
