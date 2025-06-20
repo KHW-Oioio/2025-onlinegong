@@ -22,10 +22,14 @@ sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
 ax.set_title(f"{country} – Temp/Precip/Damage Correlation")
 st.pyplot(fig)
 
-# 축 및 주요 용어 설명 추가
 st.markdown("""
 **용어 설명:**  
 - **avg_temp**: 해당 연도 평균 기온 (°C)  
 - **precip**: 연간 강수량 (mm)  
 - **damage**: 재난으로 인한 피해액 (억원)  
+
+**상관계수 값의 의미:**  
+- **1**: 완전한 양의 상관관계 (두 변수는 함께 증가)  
+- **0**: 상관관계 없음 (두 변수는 서로 관련 없음)  
+- **-1**: 완전한 음의 상관관계 (한 변수가 증가하면 다른 변수는 감소)  
 """)
