@@ -1,19 +1,22 @@
-# 국가별 리스크 점수 산출 페이지
-import os, sys, streamlit as st, pandas as pd, numpy as np, seaborn as sns, matplotlib.pyplot as plt
+import os, streamlit as st, pandas as pd, numpy as np, seaborn as sns, matplotlib.pyplot as plt
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from data_loader import load_weather_data, load_disaster_data, COUNTRY_LIST
+# 데이터 경로 설정 및 CSV 로드
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
+WEATHER_CSV  = os.path.join(DATA_DIR, "weather_data.csv")
+DISASTER_CSV = os.path.join(DATA_DIR, "disaster_data.csv")
+
+weather_df  = pd.read_csv(WEATHER_CSV)
+disaster_df = pd.read_csv(DISASTER_CSV)
+
+COUNTRY_LIST = weather_df["country"].unique().tolist()
 
 st.title("🌡️ SDGs‑13 Risk Score Analysis")
 
-wdf = load_weather_data()
-ddf = load_disaster_data()
-
-# 1. 지표 정규화 (min‑max)
+# 1. 지표 정규화 (min-max scaling)
 metrics = []
 for c in COUNTRY_LIST:
-    cw = wdf[wdf["country"] == c]
-    cd = ddf[ddf["country"] == c]
+    cw = weather_df[weather_df["country"] == c]
+    cd = disaster_df[disaster_df["country"] == c]
     temp = cw["avg_temp"].mean()
     precip = cw["precip"].mean()
     damage = cd["damage"].mean()
@@ -21,14 +24,20 @@ for c in COUNTRY_LIST:
 
 df = pd.DataFrame(metrics).set_index("country")
 norm = (df - df.min()) / (df.max() - df.min())
+
 weights = {"temp": 0.4, "precip": 0.2, "damage": 0.4}
 score = (norm * pd.Series(weights)).sum(axis=1).sort_values(ascending=False)
 
-st.subheader("📊 국가별 기후 리스크 점수")
+st.subheader("📊 Risk Scores by Country")
 fig, ax = plt.subplots(figsize=(8,4))
 sns.barplot(x=score.values, y=score.index, ax=ax, palette="Reds_r")
-ax.set_xlabel("Risk Score (0~1)")
+ax.set_xlabel("Risk Score (0 to 1)")
 ax.set_ylabel("")
+ax.set_title("Climate & Disaster Risk Score by Country")
 st.pyplot(fig)
 
-st.caption("Risk Score = 0.4✕Temp Z + 0.2✕Precip Z + 0.4✕Damage Z")
+st.markdown("""
+**Risk Score Formula:**  
+- Risk Score = 0.4 × Normalized Temperature + 0.2 × Normalized Precipitation + 0.4 × Normalized Disaster Damage  
+- 각 지표는 국가별 평균값에 대해 0~1 범위로 정규화하였으며, 가중치는 임의로 설정했습니다.  
+""")
