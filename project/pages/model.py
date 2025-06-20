@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 def run_monte_carlo(base_damage, policy_effectiveness=0.1, simulations=1000):
     results = []
