@@ -1,12 +1,17 @@
 # ────────────────────────────────────────────────
-# pages/SDGs-13.py
+# pages/SDGs_13.py
+# Streamlit Cloud 환경 최적화 버전
 # ────────────────────────────────────────────────
 import streamlit as st
 import pandas as pd
-from pages.data_loader import load_weather_data, load_disaster_data, COUNTRY_COORDS
-from pages.model import build_graph, run_mc
-from pages.utils import hist, heat, pie
+import os, sys
 
+# 상위 폴더 경로를 Python 모듈 경로에 추가
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from data_loader import load_weather_data, load_disaster_data, COUNTRY_COORDS
+from model import build_graph, run_mc
+from utils import hist, heat, pie
 
 st.title("🌍 SDGs‑13 Climate & Disaster Simulation Dashboard")
 st.markdown("이 대시보드는 기후 변수 및 재난 데이터를 기반으로 **의사결정 및 정책 영향**을 분석합니다.")
