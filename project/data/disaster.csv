@@ -1,7 +1,41 @@
-year,region,disaster_type,damage_amount_hundred_million_won
-2020,Korea,Flood,830
-2021,Korea,Typhoon,540
-2022,Korea,Heatwave,620
-2020,USA,Wildfire,1200
-2021,USA,Hurricane,2100
-2022,USA,Flood,900
+country,year,damage
+United States,2018,1050
+United States,2019,980
+United States,2020,1200
+United States,2021,1150
+United States,2022,1100
+China,2018,850
+China,2019,920
+China,2020,980
+China,2021,1020
+China,2022,950
+India,2018,600
+India,2019,650
+India,2020,700
+India,2021,740
+India,2022,720
+Germany,2018,120
+Germany,2019,140
+Germany,2020,180
+Germany,2021,600
+Germany,2022,200
+South Korea,2018,180
+South Korea,2019,150
+South Korea,2020,500
+South Korea,2021,400
+South Korea,2022,220
+Japan,2018,350
+Japan,2019,300
+Japan,2020,420
+Japan,2021,380
+Japan,2022,360
+France,2018,90
+France,2019,110
+France,2020,130
+France,2021,150
+France,2022,140
+Brazil,2018,250
+Brazil,2019,270
+Brazil,2020,300
+Brazil,2021,320
+Brazil,2022,310
