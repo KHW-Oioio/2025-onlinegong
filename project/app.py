@@ -1,19 +1,21 @@
 import streamlit as st
-from pages.data_loader import load_weather_data, load_disaster_data
+from pages.data_loader import load_weather_data, load_disaster_data, COUNTRY_COORDS
 
-st.set_page_config(page_title="SDGs‑13 Simulator", layout="wide")
+st.set_page_config(page_title="SDGs‑13 Global Simulator", layout="wide")
 
-st.title("🌍 SDGs‑13 Climate & Disaster Dashboard (Streamlit Cloud edition)")
-st.markdown("사이드바 메뉴에서 **‘SDGs‑13 Dashboard’** 페이지를 클릭해 시뮬레이션을 실행하세요.")
+st.title("🌍 SDGs‑13 Global Climate‑Disaster Dashboard")
+st.markdown("왼쪽 메뉴에서 **‘SDGs‑13 Dashboard’** 페이지를 클릭하세요.")
+
+st.write("**지원 국가 수:**", len(COUNTRY_COORDS))
 
 try:
-    st.subheader("📑 Weather CSV preview (top‑5 rows)")
-    st.dataframe(load_weather_data().head())
+    st.subheader("📑 Weather CSV (Top‑5 rows)")
+    st.dataframe(load_weather_data(list(COUNTRY_COORDS.keys())[0]).head())
 except Exception as e:
-    st.warning(f"Weather CSV 로드 실패: {e}")
+    st.warning(e)
 
 try:
-    st.subheader("📑 Disaster CSV preview (top‑5 rows)")
+    st.subheader("📑 Disaster CSV (Top‑5 rows)")
     st.dataframe(load_disaster_data().head())
 except Exception as e:
-    st.warning(f"Disaster CSV 로드 실패: {e}")
+    st.warning(e)
