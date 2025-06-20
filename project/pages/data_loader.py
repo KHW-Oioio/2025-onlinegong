@@ -1,57 +1,91 @@
-import os, requests, pandas as pd
+import os, requests, json, pandas as pd
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# project/data directory (one level up from pages)
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# 좌표 사전 (예시)
+# ------------------------------------------------------------
+# 1. Real WEATHER data via Open‑Meteo archive (free & key‑less)
+#    3 demo regions with coords; easy to add more.
+# ------------------------------------------------------------
 REGION_COORDS = {
-    "RegionA": (37.5665, 126.9780),  # 서울
-    "RegionB": (35.1796, 129.0756),  # 부산
-    "RegionC": (35.8714, 128.6014),  # 대구
+    "Seoul":   (37.5665, 126.9780),
+    "Busan":   (35.1796, 129.0756),
+    "Daegu":   (35.8714, 128.6014),
 }
 
-# ───────────────────────── 기상 데이터 (Open‑Meteo) ─────────────────────────
+ARCHIVE_START = "2023-01-01"
+ARCHIVE_END   = "2023-12-31"
 
-def _fetch_weather_openmeteo(region:str, start:str, end:str):
+def _fetch_region_weather(region:str):
     lat, lon = REGION_COORDS[region]
     url = (
         "https://archive-api.open-meteo.com/v1/archive"
         f"?latitude={lat}&longitude={lon}"
-        f"&start_date={start}&end_date={end}"
+        f"&start_date={ARCHIVE_START}&end_date={ARCHIVE_END}"
         "&daily=temperature_2m_mean,precipitation_sum,windspeed_10m_max"
         "&timezone=Asia%2FSeoul"
     )
-    j = requests.get(url, timeout=30).json()
+    r = requests.get(url, timeout=30)
+    ds = r.json()["daily"]
     return pd.DataFrame({
-        "date": j["daily"]["time"],
-        f"{region}_temp":   j["daily"]["temperature_2m_mean"],
-        f"{region}_precip": j["daily"]["precipitation_sum"],
-        f"{region}_wind":   j["daily"]["windspeed_10m_max"],
+        "date": ds["time"],
+        f"{region}_temp":   ds["temperature_2m_mean"],
+        f"{region}_precip": ds["precipitation_sum"],
+        f"{region}_wind":   ds["windspeed_10m_max"],
     })
 
-def _build_weather_csv(start="2022-01-01", end="2022-12-31"):
-    merged = None
-    for r in REGION_COORDS:
-        df = _fetch_weather_openmeteo(r, start, end)
-        merged = df if merged is None else merged.merge(df, on="date")
-    merged.to_csv(os.path.join(DATA_DIR, "weather.csv"), index=False)
-    return merged
+def _build_weather_csv():
+    dfs = [_fetch_region_weather(r) for r in REGION_COORDS]
+    df = dfs[0]
+    for d in dfs[1:]:
+        df = df.merge(d, on="date")
+    df.to_csv(os.path.join(DATA_DIR, "weather.csv"), index=False)
+    return df
 
-# ───────────────────────── 재난 데이터 (샘플 CSV) ─────────────────────────
+# ------------------------------------------------------------
+# 2. Real DISASTER stats: try UNDRR GAR API (public, no auth)   
+#    Fallback to internal demo CSV if API fails.
+# ------------------------------------------------------------
 
-def _create_dummy_disaster():
-    csv = """year,region,damage_amount_hundred_million_won,deaths
-2020,RegionA,1.5,2
-2021,RegionB,0.8,0
-2022,RegionC,2.1,1
-2022,RegionA,1.2,0
+def _fetch_disaster_undrr():
+    # GAR API: https://risk-informed-dev.github.io/gar-api/
+    # We'll pull Korea (410) summary for 2000‑2023.
+    try:
+        url = "https://garapi.globalgarhub.org/v1/risks/iso/KOR"
+        recs = requests.get(url, timeout=30).json()["records"]
+        rows = []
+        for r in recs:
+            rows.append({
+                "year": r["year"],
+                "region": "Korea",
+                "damage_amount_hundred_million_won": r.get("economic_loss_avg", 0)/1e8,
+                "deaths": r.get("mortality_avg", 0),
+            })
+        df = pd.DataFrame(rows)
+        df.to_csv(os.path.join(DATA_DIR, "disaster.csv"), index=False)
+        return df
+    except Exception:
+        return None
+
+def _build_demo_disaster_csv():
+    demo = """year,region,damage_amount_hundred_million_won,deaths
+2020,Seoul,1.5,2
+2021,Busan,0.8,0
+2022,Daegu,2.1,1
+2022,Seoul,1.2,0
 """
     with open(os.path.join(DATA_DIR, "disaster.csv"), "w", encoding="utf-8") as f:
-        f.write(csv)
+        f.write(demo)
+    return pd.read_csv(os.path.join(DATA_DIR, "disaster.csv"))
 
-# ───────────────────────── 공개 API 호출 → CSV 로컬 저장 ─────────────────────────
+# ------------------------------------------------------------
+# Public loader functions
+# ------------------------------------------------------------
 
 def load_weather_data():
     path = os.path.join(DATA_DIR, "weather.csv")
@@ -63,8 +97,9 @@ def load_weather_data():
 def load_disaster_data():
     path = os.path.join(DATA_DIR, "disaster.csv")
     if not os.path.exists(path):
-        _create_dummy_disaster()
+        df = _fetch_disaster_undrr()
+        if df is None:
+            df = _build_demo_disaster_csv()
     df = pd.read_csv(path)
     df.columns = df.columns.str.strip().str.lower()
     return df
-```
