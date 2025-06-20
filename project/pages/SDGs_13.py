@@ -3,9 +3,10 @@
 # ────────────────────────────────────────────────
 import streamlit as st
 import pandas as pd
-from .data_loader import load_weather_data, load_disaster_data, COUNTRY_COORDS
-from .utils import hist, heat, pie
-from .model import build_graph, run_mc
+from pages.data_loader import load_weather_data, load_disaster_data, COUNTRY_COORDS
+from pages.model import build_graph, run_mc
+from pages.utils import hist, heat, pie
+
 
 st.title("🌍 SDGs‑13 Climate & Disaster Simulation Dashboard")
 st.markdown("이 대시보드는 기후 변수 및 재난 데이터를 기반으로 **의사결정 및 정책 영향**을 분석합니다.")
