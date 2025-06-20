@@ -1,19 +1,3 @@
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-import platform
-
-if platform.system() == 'Windows':
-    font_path = 'C:/Windows/Fonts/malgun.ttf'
-elif platform.system() == 'Darwin':
-    font_path = '/System/Library/Fonts/Supplemental/AppleGothic.ttf'
-else:
-    font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
-
-fontprop = fm.FontProperties(fname=font_path)
-plt.rcParams['font.family'] = fontprop.get_name()
-plt.rcParams['axes.unicode_minus'] = False
-
-# ... 이하 기존 그래프 생성 코드
 
 import os, streamlit as st, numpy as np, pandas as pd, seaborn as sns, matplotlib.pyplot as plt
 
