@@ -1,8 +1,10 @@
 import numpy as np
+import pandas as pd
 
-def run_policy_simulation(base_damage, temp_increase, policy_effectiveness, iterations=1000):
-    np.random.seed(42)
-    random_temp = np.random.normal(temp_increase, 0.5, iterations)
-    damages = base_damage * (1 + 0.2 * random_temp)
-    damages *= (1 - policy_effectiveness)
-    return damages
+def run_monte_carlo(base_damage, policy_effectiveness=0.1, simulations=1000):
+    results = []
+    for _ in range(simulations):
+        random_factor = np.random.normal(loc=1 - policy_effectiveness, scale=0.05)
+        result = max(base_damage * random_factor, 0)
+        results.append(result)
+    return results
